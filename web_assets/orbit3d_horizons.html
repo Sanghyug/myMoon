@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>공전과 자전 (3D 인터랙티브 모델)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        html, body { margin:0; background:#000; overflow:hidden; }
+        canvas { display:block; margin:auto; }
+
+        #header {
+          position:absolute; top:12px; left:0; width:100%;
+          display:flex; justify-content:center; align-items:center; gap:12px;
+          z-index:20;
+        }
+        #title {
+          position: absolute; top: 20px; left: 20px;
+          color: #fff; font: 700 20px/1.3 "Noto Sans KR", sans-serif;
+          text-shadow: 0 2px 8px rgba(0,0,0,.6); margin: 0;
+        }
+
+        #citySelect {
+           position: absolute; top: 60px;   /* 타이틀 아래에 배치 */ left: 20px;
+           padding: 6px 10px; border-radius: 8px; background: rgba(20,20,20,.6);
+           color: #fff; font-size: 14px; border: 1px solid #555;
+        }
+
+        #ctrlBox {
+          position:absolute; bottom:28px; left:50%;
+          transform:translateX(-50%);
+          display:flex; gap:14px;
+          background:rgba(20,20,20,.6);
+          padding:10px 16px;
+          border-radius:12px;
+          box-shadow:0 3px 12px rgba(0,0,0,.35);
+          z-index:10;
+        }
+        button {
+          border:none; border-radius:8px;
+          padding:8px 16px; font-weight:600;
+          color:#fff; background:linear-gradient(180deg,#444,#222);
+          cursor:pointer;
+        }
+        button:hover { background:linear-gradient(180deg,#555,#333); }
+
+        /* 미학 통일된 버튼들 */
+        #viewBtn,
+        #infoBtn,
+        #orbitToggleBtn,
+        #zenModeBtn {
+          position:absolute;
+          bottom:28px;
+          background:rgba(20,20,20,0.7);
+          border:1px solid #444;
+          padding:8px 16px;
+          border-radius:8px;
+          font-weight:600;
+          color:#fff;
+          z-index:10;
+        }
+        #viewBtn:hover,
+        #infoBtn:hover,
+        #orbitToggleBtn:hover,
+        #zenModeBtn:hover {
+          background:rgba(40,40,40,0.8);
+        }
+
+        /* 위치 조정 */
+        #viewBtn { left:28px; }
+        #infoBtn { right:28px; }
+        #orbitToggleBtn { right:140px; }
+        #zenModeBtn { right:250px; }
+
+
+        #infoPopup {
+          position:absolute; top:50%; left:50%;
+          transform:translate(-50%, -50%);
+          background:rgba(15,15,20,0.95);
+          color:#fff; font:14px/1.6 "Noto Sans KR",sans-serif;
+          border-radius:12px;
+          padding:20px 24px;
+          width:320px; box-shadow:0 0 20px rgba(0,0,0,0.5);
+          display:none; z-index:30;
+        }
+        #infoPopup h3 { margin-top:0; color:#6cf; }
+        #infoPopup button {
+          background:#333; border:1px solid #666; margin-top:12px;
+        }
+        #infoPopup h4 {
+          margin: 8px 0 6px 0;
+          text-align: center;
+          font-size: 10px;
+          line-height: 1.5;
+          color: #ddd;
+          white-space: normal;      /* 줄바꿈 허용 */
+          word-break: keep-all;     /* 한국어 단어 단위로 자연스럽게 줄바꿈 */
+        }
+        #infoPopup .divider {
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.35), rgba(255,255,255,0.1));
+          margin: 10px 0 12px 0;
+        }
+
+    </style>
+</head>
+
+<body>
+<div id="header">
+    <div id="title">태양, 지구 그리고 달</div>
+    <select id="citySelect">
+        <option value="">도시 선택</option>
+        <option value="seoul">서울</option>
+        <option value="tokyo">도쿄</option>
+        <option value="beijing">베이징</option>
+        <option value="shanghai">상하이</option>
+        <option value="bangkok">방콕</option>
+        <option value="singapore">싱가포르</option>
+        <option value="delhi">델리</option>
+        <option value="mumbai">뭄바이</option>
+        <option value="jakarta">자카르타</option>
+        <option value="manila">마닐라</option>
+
+        <option value="london">런던</option>
+        <option value="paris">파리</option>
+        <option value="berlin">베를린</option>
+        <option value="rome">로마</option>
+        <option value="madrid">마드리드</option>
+        <option value="moscow">모스크바</option>
+        <option value="istanbul">이스탄불</option>
+        <option value="stockholm">스톡홀름</option>
+
+        <option value="newyork">뉴욕</option>
+        <option value="losangeles">로스앤젤레스</option>
+        <option value="toronto">토론토</option>
+        <option value="mexico">멕시코시티</option>
+        <option value="sao_paulo">상파울루</option>
+        <option value="buenosaires">부에노스아이레스</option>
+        <option value="lima">리마</option>
+
+        <option value="cairo">카이로</option>
+        <option value="lagos">라고스</option>
+        <option value="johannesburg">요하네스버그</option>
+        <option value="nairobi">나이로비</option>
+        <option value="casablanca">카사블랑카</option>
+
+        <option value="sydney">시드니</option>
+        <option value="melbourne">멜버른</option>
+        <option value="auckland">오클랜드</option>
+
+        <option value="dubai">두바이</option>
+        <option value="riyadh">리야드</option>
+        <option value="tehran">테헤란</option>
+        <option value="jerusalem">예루살렘</option>
+    </select>
+</div>
+
+<div id="ctrlBox">
+    <button id="playBtn">⏸ 일시정지</button>
+    <button id="resumeBtn">▶ 재생</button>
+</div>
+
+<button id="viewBtn">🌍 지구 중심 보기</button>
+<button id="orbitToggleBtn">◎ 궤도 보기</button>
+<button id="zenModeBtn">🌕 달멍하기</button>
+<button id="infoBtn">ℹ️ Info</button>
+
+<div id="infoPopup">
+    <h3>🌍 지구와 달 정보</h3>
+
+    <div class="divider"></div>
+
+    <h4>
+        이 모델링은 달과 지구의 운동을 이해하기 쉽게 하기 위해<br>
+        실제 비율, 거리, 속도 등을 과장하고 단순화했니다.<br>
+        실제 데이터는 아래와 같습니다.
+    </h4>
+
+    <div class="divider"></div>
+
+    ☀️ 태양–지구: 약 1AU (1억 4,960만 km)<br>
+    🌍 지구–달 평균 거리: 38만 4,400 km<br>
+    🌀 지구 공전: 365.25일 / 달 공전: 27.3일<br>
+    🌗 달 궤도 기울기: 약 5.145° / 지구 자전축 기울기: 약 23.5°<br>
+    🌞 태양도 은하 중심을 2억 2,500만 년에 한 바퀴 회전<br>
+    🌗 달의 세차운동 주기: 18.6년<br>
+    <button id="closeInfo">닫기</button>
+</div>
+
+<canvas id="orbitCanvas"></canvas>
+
+<div id="notice">
+    이 모델링은 이해를 돕기 위해 일부 과장된 부분이 있습니다.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+    const renderer = new THREE.WebGLRenderer({canvas: document.getElementById('orbitCanvas'), antialias:true});
+    renderer.setSize(window.innerWidth,520);
+    renderer.setPixelRatio(devicePixelRatio);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/520, 0.1, 100);
+    camera.position.set(2.2,1.2,2.2);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    window.addEventListener('resize',()=>{
+      renderer.setSize(window.innerWidth,520);
+      camera.aspect=window.innerWidth/520;
+      camera.updateProjectionMatrix();
+    });
+
+    const loader = new THREE.TextureLoader();
+    scene.background = loader.load('../assets/images/stars_bg.jpg');
+
+    /* 태양 */
+    const sun = new THREE.Mesh(
+      new THREE.SphereGeometry(0.2,64,64),
+      new THREE.MeshBasicMaterial({map:loader.load('../assets/images/sun_texture.jpg')})
+    );
+    scene.add(sun);
+    scene.add(new THREE.PointLight(0xffffff,3));
+
+    /* 지구 + 축 */
+    const earth = new THREE.Mesh(
+      new THREE.SphereGeometry(0.06,64,64),
+      new THREE.MeshPhongMaterial({
+        map: loader.load('../assets/images/earth_day.jpg'),
+        emissiveMap: loader.load('../assets/images/earth_night.jpg'),
+        emissiveIntensity:0.8
+      })
+    );
+    const axis = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0,-0.09,0),
+        new THREE.Vector3(0, 0.09,0)
+      ]),
+      new THREE.LineBasicMaterial({color:0xffffff,opacity:0.6,transparent:true})
+    );
+    earth.add(axis);
+
+    const earthTilt = new THREE.Object3D();
+    earthTilt.rotation.z = THREE.MathUtils.degToRad(23.5);
+    earthTilt.add(earth);
+
+    /* 달 */
+    const moon = new THREE.Mesh(
+      new THREE.SphereGeometry(0.02,64,64),
+      new THREE.MeshPhongMaterial({map:loader.load('../assets/images/moon_albedo.jpg')})
+    );
+
+    const solar = new THREE.Object3D();
+    const earthSys = new THREE.Object3D();
+    const moonTilt = new THREE.Object3D();
+    const moonSys = new THREE.Object3D();
+    scene.add(solar);
+    solar.add(earthSys);
+    earthSys.add(earthTilt);
+    earthSys.add(moonTilt);
+    moonTilt.add(moonSys);
+    moonSys.add(moon);
+    moonTilt.rotation.x = THREE.MathUtils.degToRad(10);
+
+    /* 궤도 객체 */
+    function orbit(r,c){
+      const pts=[],N=128;
+      for(let i=0;i<N;i++){
+        const t=i/N*Math.PI*2;
+        pts.push(new THREE.Vector3(Math.cos(t)*r,0,Math.sin(t)*r));
+      }
+      return new THREE.LineLoop(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({color:c,transparent:true,opacity:.5})
+      );
+    }
+    const R_e=0.8, R_m=0.15;
+    const earthOrbit = orbit(R_e,0x2f5fff);
+    const moonOrbit = orbit(R_m,0xaaaaaa);
+    scene.add(earthOrbit);
+    moonTilt.add(moonOrbit);
+
+    /* 기본 심플 모드 */
+    let orbitVisible = false;
+    earthOrbit.visible = false;
+    moonOrbit.visible = false;
+    axis.visible = false;
+
+    /* 도시 핀 */
+    const pin = new THREE.Mesh(
+      new THREE.ConeGeometry(0.005,0.02,12),
+      new THREE.MeshBasicMaterial({color:0xff3333})
+    );
+    pin.rotation.x=Math.PI;
+    earth.add(pin);
+    pin.visible=false;
+
+    const cities = {
+      seoul:{lat:37.5665,lon:126.9780}, tokyo:{lat:35.6895,lon:139.6917},
+      beijing:{lat:39.9042,lon:116.4074}, shanghai:{lat:31.2304,lon:121.4737},
+      bangkok:{lat:13.7563,lon:100.5018}, singapore:{lat:1.3521,lon:103.8198},
+      delhi:{lat:28.6139,lon:77.2090}, mumbai:{lat:19.0760,lon:72.8777},
+      jakarta:{lat:-6.2088,lon:106.8456}, manila:{lat:14.5995,lon:120.9842},
+      london:{lat:51.5072,lon:-0.1276}, paris:{lat:48.8566,lon:2.3522},
+      berlin:{lat:52.52,lon:13.4050}, rome:{lat:41.9028,lon:12.4964},
+      madrid:{lat:40.4168,lon:-3.7038}, moscow:{lat:55.7558,lon:37.6173},
+      istanbul:{lat:41.0082,lon:28.9784}, stockholm:{lat:59.3293,lon:18.0686},
+      newyork:{lat:40.7128,lon:-74.0060}, losangeles:{lat:34.0522,lon:-118.2437},
+      toronto:{lat:43.6532,lon:-79.3832}, mexico:{lat:19.4326,lon:-99.1332},
+      sao_paulo:{lat:-23.5505,lon:-46.6333}, buenosaires:{lat:-34.6037,lon:-58.3816},
+      lima:{lat:-12.0464,lon:-77.0428}, cairo:{lat:30.0444,lon:31.2357},
+      lagos:{lat:6.5244,lon:3.3792}, johannesburg:{lat:-26.2041,lon:28.0473},
+      nairobi:{lat:-1.2921,lon:36.8219}, casablanca:{lat:33.5731,lon:-7.5898},
+      sydney:{lat:-33.8688,lon:151.2093}, melbourne:{lat:-37.8136,lon:144.9631},
+      auckland:{lat:-36.8485,lon:174.7633}, dubai:{lat:25.276987,lon:55.296249},
+      riyadh:{lat:24.7136,lon:46.6753}, tehran:{lat:35.6892,lon:51.3890},
+      jerusalem:{lat:31.7683,lon:35.2137}
+    };
+
+    function latLon(lat,lon,r){
+      const φ=(90-lat)*Math.PI/180, θ=(lon+180)*Math.PI/180;
+      return new THREE.Vector3(
+        -r*Math.sin(φ)*Math.cos(θ),
+         r*Math.cos(φ),
+         r*Math.sin(φ)*Math.sin(θ)
+      );
+    }
+    document.getElementById('citySelect').onchange=e=>{
+      const c=cities[e.target.value];
+      if(!c){pin.visible=false;return;}
+      pin.position.copy(latLon(c.lat,c.lon,0.07));
+      pin.visible=true;
+    };
+
+    /* 조작 버튼 */
+    let playing=true, geo=false;
+    document.getElementById('playBtn').onclick=()=>playing=false;
+    document.getElementById('resumeBtn').onclick=()=>playing=true;
+
+    /* 지구 중심 보기 */
+    document.getElementById('viewBtn').onclick=()=>{
+      geo=!geo;
+      document.getElementById('viewBtn').textContent=
+        geo?"☀️ 태양 중심 보기":"🌍 지구 중심 보기";
+      controls.target.copy(geo?earthSys.position:new THREE.Vector3(0,0,0));
+    };
+
+    /* 궤도 보기 */
+    document.getElementById("orbitToggleBtn").onclick = () => {
+      orbitVisible = !orbitVisible;
+      earthOrbit.visible = orbitVisible;
+      moonOrbit.visible = orbitVisible;
+      axis.visible = orbitVisible;
+      document.getElementById("orbitToggleBtn").textContent =
+        orbitVisible ? "◎ 궤도 지우기" : "◎ 궤도 보기";
+    };
+
+    /* Info 팝업 */
+    document.getElementById('infoBtn').onclick=()=>document.getElementById('infoPopup').style.display='block';
+    document.getElementById('closeInfo').onclick=()=>document.getElementById('infoPopup').style.display='none';
+
+    /* 달멍 전체화면 */
+    document.getElementById("zenModeBtn").onclick = () => {
+      const canvas = document.getElementById("orbitCanvas");
+      if (canvas.requestFullscreen) canvas.requestFullscreen();
+      else if (canvas.webkitRequestFullscreen) canvas.webkitRequestFullscreen();
+      else if (canvas.msRequestFullscreen) canvas.msRequestFullscreen();
+    };
+
+    /* 애니메이션 */
+    const YEAR_DAYS=365.25;
+    const EARTH_REV_SPEED=0.05;
+    const EARTH_ROT_SPEED=EARTH_REV_SPEED*(YEAR_DAYS/8);
+    const MOON_REV_SPEED=EARTH_REV_SPEED*13.37;
+
+    let prev=performance.now();
+    function animate(now){
+      requestAnimationFrame(animate);
+
+      const dt=(now-prev)/1000;
+      prev=now;
+      if(playing){
+        const t=now*0.001;
+        earthSys.position.set(Math.cos(t*EARTH_REV_SPEED)*R_e,0,Math.sin(t*EARTH_REV_SPEED)*R_e);
+        earth.rotation.y=t*EARTH_ROT_SPEED;
+        moonSys.position.set(Math.cos(t*MOON_REV_SPEED)*R_m,0,Math.sin(t*MOON_REV_SPEED)*R_m);
+        moon.rotation.y=t*MOON_REV_SPEED;
+      }
+
+      controls.update();
+      renderer.render(scene,camera);
+    }
+    animate();
+</script>
+</body>
+</html>

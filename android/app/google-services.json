@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "194111202870",
+    "project_id": "my-moon-webapp",
+    "storage_bucket": "my-moon-webapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194111202870:android:646606f7fc18e49ecfda97",
+        "android_client_info": {
+          "package_name": "com.example.my_moon_web"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV_m5XuLwChL1d_XwFvjKqUwcN7y0D3ww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

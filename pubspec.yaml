@@ -1,0 +1,69 @@
+name: my_moon_web
+description: "A new Flutter project."
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  intl: ^0.20.2
+  webview_flutter: ^4.13.0
+  webview_flutter_web: ^0.2.3+4
+  webview_flutter_platform_interface: ^2.11.0
+  table_calendar: ^3.2.0
+  shared_preferences: ^2.5.3
+  http: ^1.5.0
+  cloud_firestore: ^5.5.0
+  firebase_core: ^3.7.0
+  firebase_storage: ^12.1.0
+  flutter_html: ^3.0.0
+  html_editor_enhanced: ^2.6.0
+  crop_your_image: ^2.0.0
+  image: ^4.2.0
+  flutter_compass: 0.8.1
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  min_sdk_android: 21
+
+
+  flutter_lints: ^5.0.0
+
+
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/moon_phases/
+    - web_assets/
+    - web_assets/orbit3d_horizons.html
+    - assets/images/
+    - assets/data/moon_messages.json
+    - assets/data/moon_fortune_8x30.json
+    - assets/data/moon_2016.json
+    - assets/images/sun_texture.jpg
+    - assets/images/earth_day.jpg
+    - assets/images/earth_night.jpg
+    - assets/images/moon_albedo.jpg
+    - assets/knowledge_images/
+
