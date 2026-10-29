@@ -6,7 +6,7 @@ const fs=require('node:fs');
 function setup(){
  let load,show,loads=0;
  const sdk={getOperationalEnvironment:()=> 'toss',loadFullScreenAd:Object.assign(p=>{loads++;load=p;return()=>{}},{isSupported:()=>true}),showFullScreenAd:Object.assign(p=>{show=p;return()=>{}},{isSupported:()=>true})};
- const source=fs.readFileSync('src/platform.ts','utf8').replaceAll('import.meta.env.VITE_REWARDED_AD_GROUP_ID',JSON.stringify('test-reward'));
+ const source=fs.readFileSync('src/platform.ts','utf8').replaceAll('import.meta.env.VITE_REWARDED_AD_GROUP_ID',JSON.stringify('test-reward')).replaceAll('import.meta.env.VITE_APP_NAME',JSON.stringify('mea-luna'));
  const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
  const context={exports:{},require:n=>n==='./storage'?{save:()=>{}}:sdk,setTimeout,clearTimeout,queueMicrotask};
  vm.runInNewContext(code,context);

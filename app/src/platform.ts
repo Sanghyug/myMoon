@@ -1,3 +1,4 @@
+import {shareText,type ShareContent} from './sharing';
 import * as sdk from '@apps-in-toss/web-framework';
 import {save} from './storage';
 export function inToss(){try{const environment=sdk.getOperationalEnvironment();return environment==='toss'||environment==='sandbox'}catch{return false}}
@@ -32,6 +33,18 @@ export async function watchRewardedAd():Promise<void>{
     },onError:()=>finish(new Error('광고를 표시하지 못했어요. 다시 시도해 주세요.'))});
   });
 }
-export async function shareMessage(text:string){if(inToss()){await sdk.Share.sendMessage({message:text});return}if(navigator.share){await navigator.share({title:'나의 달 · 달이 전하는 메시지',text});return}await navigator.clipboard.writeText(text)}
+export async function shareMessage(content:ShareContent):Promise<'shared'|'copied'>{
+ const appName=import.meta.env.VITE_APP_NAME?.trim()||'mea-luna';
+ const path=`intoss://${appName}?entry=${content.kind}`;
+ // Native Toss creates an HTTPS app link; web previews use the app scheme, never localhost.
+ const url=inToss()?await sdk.Share.createLink({path,ogImageUrl:'https://raw.githubusercontent.com/Sanghyug/myMoon/main/app/public/assets/images/mealuna_logo.png'}):path;
+ const text=shareText(content,url);
+ if(inToss()){await sdk.Share.sendMessage({message:text});return 'shared'}
+ if(navigator.share){await navigator.share({title:content.title,text});return 'shared'}
+ await navigator.clipboard.writeText(text);return 'copied';
+}
+
 
 export function subscribeBack(callback:()=>boolean){if(!inToss())return ()=>{};return sdk.graniteEvent.addEventListener('backEvent',{onEvent:()=>{if(!callback())void sdk.Screen.close()}})}
+
+export function sharedEntry(){try{const url=inToss()?sdk.Environment.initialURL:window.location.href;const entry=new URL(url).searchParams.get('entry');return entry==='fortune'?'fortune':'personality'}catch{return 'personality'}}

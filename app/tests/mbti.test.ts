@@ -4,14 +4,14 @@ import {originalMessages} from '../src/content';
 import {storyMbti} from '../src/mbti';
 import {readFileSync} from 'node:fs';
 
-test('expanded stories retain unique summaries and add strengths, pitfalls and exercises',()=>{
- const previous=JSON.parse(readFileSync(new URL('../../content-review/2026-10-28/moon_messages.before-expansion.json',import.meta.url),'utf8')).messages.flat();
+test('guardian stories describe enduring traits without daily exercises',()=>{
+ assert.equal(new Set(originalMessages.map(m=>m.guardian)).size,30);
+ assert.equal(new Set(originalMessages.map(m=>m.message)).size,150);
  for(const message of originalMessages){
-  const old=previous.find((m:{age:number;distance:number})=>m.age===message.age&&m.distance===message.distance);
-  assert.ok(message.message.length>=old.message.length*2);
-  const [summary,...rest]=message.message.split('\n\n');
-  assert.ok(!rest.join('\n').includes(summary));
-  for(const label of ['장점 ·','주의할 점 ·','오늘의 실천\n'])assert.ok(message.message.includes(label));
+  assert.ok(message.guardian.length>=3);
+  assert.ok(message.message.includes('나의 장점\n'));
+  assert.ok(message.message.includes('주의할 점\n'));
+  assert.doesNotMatch(message.message,/오늘의 실천|이번 한 주|일주일 뒤/);
  }
 });
 
