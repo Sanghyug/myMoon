@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Apps in Toss local dependencies and generated bundles
+**/node_modules/
+**/dist/
+**/.env*
+!**/.env.example
+*.ait
+*.tsbuildinfo
